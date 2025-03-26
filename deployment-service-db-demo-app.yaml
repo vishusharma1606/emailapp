@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-demo-app
+  labels:
+    app: db-demo-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: db-demo-app
+  template:
+    metadata:
+      labels:
+        app: db-demo-app
+    spec:
+      containers:
+      - name: db-demo-app
+        image: vishudock/db-demo-app:v6
+        ports:  
+        - containerPort: 3000
+        env:
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-config
+              key: MONGO_HOST
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-config
+              key: MONGO_PORT
+              
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-demo-app-service
+  labels:
+    app: db-demo-app
+spec:
+  selector:
+    app: db-demo-app
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+  type: LoadBalancer
