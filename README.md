@@ -56,7 +56,7 @@ This repository contains the Kubernetes configuration files and Dockerfile for d
 9. **Access the Application**  
    Use Minikube to access the service:
    ```bash
-   minikube service db-demo-app
+   minikube service db-demo-app-service
    ```
 
 ## Notes
