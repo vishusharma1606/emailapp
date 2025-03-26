@@ -1,40 +1,65 @@
 # db-demo-app
 
-This repository contains the Kubernetes configuration files for deploying and managing the `db-demo-app`.
+This repository contains the Kubernetes configuration files and Dockerfile for deploying and managing the `db-demo-app`.
 
-## Overview
+## Steps to Deploy
 
-The `db-demo-app` is a demo application designed to connect to a MongoDB database. The deployment includes a Kubernetes Deployment and Service to manage the application and expose it to external traffic.
+1. **Create a Docker Image**  
+   Build and push the Docker image to Docker Hub:
+   ```bash
+   docker build -t <your-dockerhub-username>/db-demo-app:v1 .
+   docker push <your-dockerhub-username>/db-demo-app:v1
+   ```
 
-## Files
+2. **Ensure Kubernetes Cluster is Set Up**  
+   Verify that your Kubernetes cluster is running and `kubectl` is configured:
+   ```bash
+   kubectl cluster-info
+   ```
 
-- **`deployment-service-db-demo-app.yaml`**: Defines the Deployment and Service for the `db-demo-app`.
+3. **Set Up MongoDB Pod**  
+   Apply the MongoDB deployment file:
+   ```bash
+   kubectl apply -f deployment-service-mongodb.yaml
+   ```
 
-## Deployment Instructions
+4. **Apply Mongo ConfigMap**  
+   Apply the `mongo-config.yaml` file:
+   ```bash
+   kubectl apply -f mongo-config.yaml
+   ```
 
-1. Ensure you have a Kubernetes cluster set up and `kubectl` configured to interact with it.
-2. Apply the configuration file:
+5. **Update the Image in Deployment File**  
+   Edit `deployment-service-db-demo-app.yaml` and update the `image` field to:
+   ```
+   image: <your-dockerhub-username>/db-demo-app:v1
+   ```
+
+6. **Deploy the Application**  
+   Apply the updated deployment file:
    ```bash
    kubectl apply -f deployment-service-db-demo-app.yaml
    ```
-3. Verify the Deployment and Service:
+
+7. **Run Persistent Volume Configuration**  
+   Apply the `host-pv.yaml` file:
    ```bash
-   kubectl get deployments
-   kubectl get services
+   kubectl apply -f host-pv.yaml
    ```
 
-## Environment Variables
+8. **Apply Persistent Volume Claim**  
+   Apply the `host-pvc.yaml` file:
+   ```bash
+   kubectl apply -f host-pvc.yaml
+   ```
 
-The application uses the following environment variables, which are configured via a ConfigMap:
-
-- **`MONGO_HOST`**: The hostname of the MongoDB server.
-- **`MONGO_PORT`**: The port number of the MongoDB server.
-
-## Accessing the Application
-
-The Service is exposed as a LoadBalancer. Use the external IP provided by the Service to access the application on port `3000`.
+9. **Access the Application**  
+   Use Minikube to access the service:
+   ```bash
+   minikube service db-demo-app-service
+   ```
 
 ## Notes
 
-- Ensure the `mongo-config` ConfigMap is created and contains the required keys (`MONGO_HOST` and `MONGO_PORT`).
-- Update the `image` field in the Deployment if a new version of the application is available.
+- Replace `<your-dockerhub-username>` with your Docker Hub username.
+- Ensure all required Kubernetes configuration files are present in the repository.
